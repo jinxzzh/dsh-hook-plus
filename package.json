@@ -1,7 +1,7 @@
 {
   "name": "dsh-hook-plus",
   "version": "0.1.0",
-  "description": "Qoder-compatible lifecycle hooks for DeepSeek Harness: 22 events, command/http/prompt/agent handlers, matcher/if filters, blocking + asyncRewake semantics.",
+  "description": "DeepSeek Harness 生命周期钩子：拦截危险命令、改写工具参数与结果、响应会话事件、长任务结束时自动唤醒模型。",
   "keywords": [
     "dsh",
     "dsh-plugin",

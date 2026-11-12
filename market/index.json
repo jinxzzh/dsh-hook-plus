@@ -5,8 +5,8 @@
     "zh": "dsh-hook-plus"
   },
   "description": {
-    "en": "Qoder-compatible lifecycle hooks for DSH.",
-    "zh": "DSH 生命周期 hooks（Qoder 功能对齐）。"
+    "en": "Lifecycle hooks for DeepSeek Harness: guard dangerous commands, rewrite tool input/output, react to session events, wake the model when long jobs finish.",
+    "zh": "DeepSeek Harness 生命周期钩子：拦截危险命令、改写工具参数与结果、响应会话事件、长任务结束时自动唤醒模型。"
   },
   "metadata": {
     "categories": {
@@ -34,8 +34,8 @@
         "zh": "Hook Plus"
       },
       "description": {
-        "en": "Own-format lifecycle hooks: 22 events, run/call/ask/check actions, matcher filters, blocking + rewake semantics.",
-        "zh": "自研格式生命周期 hooks：22 事件、run/call/ask/check 四动作、匹配过滤、阻断与唤醒语义。"
+        "en": "Lifecycle hooks for DeepSeek Harness: guard dangerous commands, rewrite tool input/output, react to session events, wake the model when long jobs finish.",
+        "zh": "DeepSeek Harness 生命周期钩子：拦截危险命令、改写工具参数与结果、响应会话事件、长任务结束时自动唤醒模型。"
       },
       "author": "jinxzzh",
       "icon": "../icon.svg",
