@@ -1,0 +1,8 @@
+node_modules/
+*.tgz
+.DS_Store
+.dsh-project-memory/
+hook-*.log
+hooks.local.json
+.DS_Store
+Thumbs.db

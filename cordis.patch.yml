@@ -1,0 +1,32 @@
+# dsh-hook-plus — self-owned lifecycle hooks (no Qoder/lite compat).
+#
+# Add hooks in the profile's cordis.patch.yml next to this row, for example:
+#
+#   - id: dsh-hook-plus
+#     name: dsh-hook-plus
+#     config:
+#       hooks:
+#         - id: guard-rm
+#           on: PreToolUse
+#           match: Bash(rm *)
+#           run: ~/.dsh/hooks/guard.sh
+#           timeout: 30s
+#         - id: lint-after-write
+#           on: PostToolUse
+#           match: { tool: Write|Edit, arg: "*.ts" }
+#           run: npx eslint --fix
+#           async: background
+#         - id: notify-done
+#           on: Stop
+#           call: https://example.com/hook
+#
+# Or create JSON files (merged user < inline < proj < local):
+#   $DSH_HOME/hooks.json, ${cwd}/.dsh/hooks.json, ${cwd}/.dsh/hooks.local.json
+# Each file: { "hooks": [ ...same hook objects... ] }
+#
+# Hook commands are trusted host configuration. They run with the host
+# process's permissions. `ask`/`check` need config.evaluator or config.llm
+# ({ baseUrl, apiKey, model } or DSH_HOOK_LLM_* env); otherwise they skip.
+- insert:
+    - id: dsh-hook-plus
+      name: dsh-hook-plus

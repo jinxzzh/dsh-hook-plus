@@ -1,0 +1,54 @@
+{
+  "name": "dsh-hook-plus",
+  "version": "0.1.0",
+  "description": "Qoder-compatible lifecycle hooks for DeepSeek Harness: 22 events, command/http/prompt/agent handlers, matcher/if filters, blocking + asyncRewake semantics.",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "hooks",
+    "lifecycle",
+    "qoder",
+    "PreToolUse",
+    "PostToolUse",
+    "automation"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "cordis.patch.yml",
+    "market/index.json",
+    "skill/SKILL.md",
+    "icon.svg",
+    "README.md",
+    "README.zh.md"
+  ],
+  "engines": {
+    "dsh": ">=0.2.1-rc.3 <0.3.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "scripts": {
+    "test": "node --test test/",
+    "check": "node --check lib/plus-format.js && node --check lib/plus-load.js && node --check lib/plus-match.js && node --check lib/plus-exec.js && node --check lib/plus-eval.js && node --check lib/plus-events.js && node --check lib/index.js"
+  },
+  "author": "jinxzzh",
+  "icon": "./icon.svg",
+  "homepage": "https://github.com/jinxzzh/dsh-hook-plus#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jinxzzh/dsh-hook-plus.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jinxzzh/dsh-hook-plus/issues"
+  }
+}

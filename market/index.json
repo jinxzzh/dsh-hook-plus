@@ -1,0 +1,73 @@
+{
+  "format": 1,
+  "title": {
+    "en": "dsh-hook-plus",
+    "zh": "dsh-hook-plus"
+  },
+  "description": {
+    "en": "Qoder-compatible lifecycle hooks for DSH.",
+    "zh": "DSH 生命周期 hooks（Qoder 功能对齐）。"
+  },
+  "metadata": {
+    "categories": {
+      "workflow": {
+        "title": {
+          "en": "Workflow & Automation",
+          "zh": "工作流与自动化"
+        }
+      }
+    },
+    "labels": {
+      "hooks": {
+        "title": {
+          "en": "Lifecycle hooks",
+          "zh": "生命周期 hooks"
+        }
+      }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-hook-plus",
+      "title": {
+        "en": "Hook Plus",
+        "zh": "Hook Plus"
+      },
+      "description": {
+        "en": "Own-format lifecycle hooks: 22 events, run/call/ask/check actions, matcher filters, blocking + rewake semantics.",
+        "zh": "自研格式生命周期 hooks：22 事件、run/call/ask/check 四动作、匹配过滤、阻断与唤醒语义。"
+      },
+      "author": "jinxzzh",
+      "icon": "../icon.svg",
+      "homepage": "https://github.com/jinxzzh/dsh-hook-plus#readme",
+      "repository": {
+        "url": "https://github.com/jinxzzh/dsh-hook-plus"
+      },
+      "metadata": {
+        "category": "workflow",
+        "keywords": [
+          "hooks",
+          "lifecycle",
+          "automation",
+          "qoder"
+        ],
+        "labels": [
+          "hooks"
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.1.0",
+          "publishTimestamp": 1793542781,
+          "source": {
+            "url": "https://github.com/jinxzzh/dsh-hook-plus",
+            "type": "git"
+          },
+          "engines": {
+            "dsh": ">=0.2.1-rc.3 <0.3.0"
+          }
+        }
+      ]
+    }
+  ]
+}

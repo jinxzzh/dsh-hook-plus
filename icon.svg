@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="dsh-hooks-lite">
+  <rect width="1024" height="1024" rx="220" fill="#0f172a"/>
+  <path d="M300 320h170v170H300z" fill="#2563eb" opacity=".9"/>
+  <path d="M554 320h170v170H554z" fill="#38bdf8" opacity=".9"/>
+  <path d="M300 554h170v170H300z" fill="#38bdf8" opacity=".9"/>
+  <path d="M554 554h170v170H554z" fill="#2563eb" opacity=".9"/>
+  <path d="M470 405h84M470 639h84M385 470v84M639 470v84" stroke="#e2e8f0" stroke-width="34" stroke-linecap="round"/>
+  <circle cx="512" cy="512" r="34" fill="#f8fafc"/>
+</svg>
