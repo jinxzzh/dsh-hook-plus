@@ -8,10 +8,8 @@
     "deepseek-harness",
     "hooks",
     "lifecycle",
-    "qoder",
-    "PreToolUse",
-    "PostToolUse",
-    "automation"
+    "automation",
+    "rewake"
   ],
   "license": "MIT",
   "type": "module",

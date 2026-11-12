@@ -1,4 +1,4 @@
-# dsh-hook-plus — self-owned lifecycle hooks (no Qoder/lite compat).
+# dsh-hook-plus — self-owned lifecycle hooks for DSH.
 #
 # Add hooks in the profile's cordis.patch.yml next to this row, for example:
 #

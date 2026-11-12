@@ -2,13 +2,13 @@
 
 [English](./README_EN.md)
 
-DeepSeek Harness 自研格式生命周期 hooks，对齐 Qoder Hooks 功能。一个 hook = 一事件 + 一动作，不收 `type:` 税。
+DeepSeek Harness 生命周期 hooks 插件：一个 hook = 一事件 + 一动作。能拦危险命令、改写工具参数与结果、监听会话事件、长任务结束时叫醒模型——不需要轮询等待。
 
 ```yaml
 - id: guard-rm
   on: PreToolUse
-  match: Bash(git *)
-  run: ~/.dsh/hooks/block.sh
+  match: Bash(rm *)
+  run: node ~/.dsh/hooks/guard.mjs
 - id: lint
   on: PostToolUse
   match: { tool: Write|Edit, arg: "*.ts" }
@@ -17,12 +17,130 @@ DeepSeek Harness 自研格式生命周期 hooks，对齐 Qoder Hooks 功能。�
   async: background
 ```
 
+## 安装
+
+```powershell
+# 1. 装插件（二选一）
+dsh plugin --profile desktop add github:jinxzzh/dsh-hook-plus
+# 或者本地目录安装（开发版）：
+# dsh plugin --profile desktop add D:\path\to\dsh-hook-plus
+
+# 2. 拷开箱脚本和示例配置到你的 DSH home（只需一次）
+Copy-Item <repo>\hooks\* $env:USERPROFILE\.dsh\hooks\
+Copy-Item <repo>\examples\hooks.json $env:USERPROFILE\.dsh\hooks.json
+# Linux/macOS: cp <repo>/hooks/* ~/.dsh/hooks/ && cp <repo>/examples/hooks.json ~/.dsh/hooks.json
+
+# 3. 重启 DSH（新插件需重启加载；之后改配置只用 /hooks-reload）
+# 4. 任意会话执行 /hooks，看到 4 个 hook 且无 Warnings 即成功
+```
+
+引用一律写 `node ~/.dsh/hooks/guard.mjs`：行首 `~/` 由插件在所有平台展开（含 Windows `cmd`），`wait-flag.mjs` 自己的 flag 参数也展开 `~`。共享配置里不要写死绝对路径。
+
+## 应用方法
+
+### 1. 危险命令拦截
+
+模型执行工具前先过一遍安检，命中直接拒绝并告诉模型原因：
+
+```yaml
+- id: guard-rm
+  on: PreToolUse
+  match: Bash(rm *)
+  run: node ~/.dsh/hooks/guard.mjs
+```
+
+自带 `guard.mjs` 会拒绝：`rm -rf /|~|盘符根`、fork 炸弹、裸盘写入（`dd of=/dev/`）、`mkfs`、系统目录删除、格盘。只在匹配的命令上触发（`match` 先窄过滤），正常命令零打扰。
+
+### 2. 写后自动检查
+
+文件写入/编辑成功后自动跑 lint、格式化或单测，失败只记日志不挡流程：
+
+```yaml
+- id: lint
+  on: PostToolUse
+  match: { tool: Write|Edit, arg: "*.ts" }
+  run: npx eslint --fix
+  async: background
+```
+
+### 3. 长任务完成通知（不用 sleep 轮询）
+
+`async: rewake` 的 hook 在后台等程序结束，结束那一刻叫醒模型并附上结果：
+
+```yaml
+- id: wait-long-job
+  on: PostToolUse
+  match: { tool: pwsh, arg: "*train.py*" }
+  async: rewake
+  timeout: 10m
+  rewakeSummary: 训练任务已结束
+  run: node ~/.dsh/hooks/wait-flag.mjs ~/.dsh/hooks/done.flag
+```
+
+启动任务时顺手埋个结束标记（程序正常/异常退出都会写）：
+
+```powershell
+python train.py; "EXIT:$LASTEXITCODE" | Out-File ~/.dsh/hooks/done.flag
+```
+
+`wait-flag.mjs` 用 `fs.watch` 事件驱动等待（不是轮询），flag 出现即 `exit 2` 唤醒，模型直接看到程序输出摘要。单次等待上限 10 分钟，超长任务可分段埋多个 flag 续接。默认 `enabled: false`，用时打开并按需改 `match`。
+
+### 4. 失败自动记账
+
+工具失败后把现场追加到日志文件，回头统一复盘：
+
+```yaml
+- id: log-failures
+  on: PostToolUseFailure
+  match: Bash
+  async: background
+  run: node ~/.dsh/hooks/log-fail.mjs >> ~/.dsh/hooks/failures.log
+```
+
+### 5. AI 评审门禁
+
+拿一次独立的模型调用做判断，返回 `{ok, reason}`；`ok:false` 即阻断：
+
+```yaml
+- id: prod-guard
+  on: PreToolUse
+  match: Bash(kubectl delete *)
+  ask: 判断这条命令在生产环境是否安全，不安全返回 ok=false 并给出 reason
+  model: haiku
+```
+
+### 6. 子 Agent 实地核查
+
+需要读文件、跑检查才能判定的场景，起一个子 Agent 去看现场，必须调 `StructuredOutput` 返回 `{ok, reason}`：
+
+```yaml
+- id: review-diff
+  on: PreToolUse
+  match: Bash(git push *)
+  check: 审查当前工作区未提交变更是否可发布：$ARGUMENTS
+  tools: [Read, Grep]
+  maxTurns: 20
+```
+
+### 7. 回调外部服务
+
+把事件 JSON POST 给你的服务，由服务决定 `allow/deny` 或记录归档：
+
+```yaml
+- id: audit
+  on: PostToolUse
+  async: background
+  call: https://example.com/hook
+```
+
+`ask`/`check` 需配置模型通道：`config.evaluator` 函数优先，否则 `config.llm: {baseUrl, apiKey?, model}` 或 `DSH_HOOK_LLM_URL/_KEY/_MODEL` 环境变量（OpenAI 兼容接口）。都没配则跳过放行并警告。
+
 ## 格式
 
 | 字段 | 必填 | 说明 |
 |---|---|---|
 | `id` | 是（自动带来源前缀 `user-1`/`proj-2`…） | 唯一；同文件重复丢弃并报错，跨文件后加载覆盖先加载 |
-| `on` | 是 | 22 规范事件名（`SessionStart…ElicitationResult`），小写别名可进 |
+| `on` | 是 | 22 规范事件名（`SessionStart…ElicitationResult`），常用小写别名可进（`pre-tool`、`user/message` 等） |
 | `run`/`call`/`ask`/`check` | 四选一 | shell 命令 / http(s) 地址 / 评判提示词 / 子 Agent 提示词 |
 | `match` | 否 | 字符串速写（`Bash`、`Write\|Edit`、`*`、`mcp__.*`、`Bash(git *)`）或对象（`tool` 走匹配语法、`arg` 走 glob，其余键是 payload 路径：正则 / 布尔数字精确相等 / `{gt,gte,lt,lte,eq}`） |
 | `timeout` | 否 | `500ms`/`30s`/`5m`，裸数字按**秒**；默认 run 30s / call 15s / ask 60s / check 120s，上限 10 分钟 |
@@ -33,7 +151,7 @@ DeepSeek Harness 自研格式生命周期 hooks，对齐 Qoder Hooks 功能。�
 | `msg/rewakeMessage/rewakeSummary` | 否 | spinner 文案；唤醒备注（摘要 ≤300 字） |
 | `cwd/stdin/block/enabled/once` | 否 | `session` = 会话目录；`stdin:false` 不喂 payload；`block:false` 只观察；`once` 成功一次即消费 |
 
-工具名忽略大小写（`Bash` 能命中 DSH 的 `bash`），文件路径保持大小写敏感。超时 fail-closed：卡死的拦截器按拒绝处理。裸数字超时按秒。
+工具名忽略大小写（`Bash` 能命中 DSH 的 `bash`），文件路径保持大小写敏感。超时 fail-closed：卡死的拦截器按拒绝处理。
 
 ## 配置来源（从低到高，同名后赢）
 
@@ -42,7 +160,7 @@ DeepSeek Harness 自研格式生命周期 hooks，对齐 Qoder Hooks 功能。�
 3. `${cwd}/.dsh/hooks.json`（项目共享）
 4. `${cwd}/.dsh/hooks.local.json`（本机项目）
 
-缺文件静默跳过，坏 JSON 只报错不抛。`/hooks` 看来源、覆盖关系、警告和最近运行，`/hooks-reload` 重读全部。
+缺文件静默跳过，坏 JSON 只报错不抛。`/hooks` 看来源、覆盖关系、警告和最近运行，`/hooks-reload` 重读全部（改配置不用重启）。
 
 ## 事件 → DSH 接缝
 
@@ -54,7 +172,7 @@ DeepSeek Harness 自研格式生命周期 hooks，对齐 Qoder Hooks 功能。�
 | `UserPromptSubmit` | `session/event` 的 `user/message` | 仅观察（广播拦不住）；拒绝转为唤醒备注；消息文本镜像到 `prompt`，字符串匹配能命中 |
 | 其余（Session*/Permission*/Subagent*/Compact/Notification…） | `session/event` 收规范类型直通 | 有宿主发出即触发；仅明确拒绝才唤醒 |
 
-`step/end`、`session/title` 无 Qoder 对应，配置校验直接拒绝（请写 `Stop`），未知会话类型警告一次并跳过。
+`step/end`、`session/title` 不映射任何事件，配置校验直接拒绝（请写 `Stop`），未知会话类型警告一次并跳过。
 
 ## Hook 应答（扁平，无包装）
 
@@ -81,18 +199,6 @@ Reason: no rm
 
 `rewake` 仅明确拒绝才叫醒（`exit 2`、JSON `decision:deny`/`ok:false`）；普通 `exit 1` 和超时只记日志。agent 按会话缓存，首个工具调用即建档，后续 session 事件可用。
 
-## Hook 脚本（可移植安装）
-
-仓库 `hooks/` 下自带开箱脚本（`guard.mjs`、`wait-flag.mjs`），只用可移植路径：
-
-```powershell
-# 一次性安装：拷到你的 DSH home
-Copy-Item <repo>\hooks\* $env:USERPROFILE\.dsh\hooks\
-Copy-Item <repo>\examples\hooks.json $env:USERPROFILE\.dsh\hooks.json  # 再按需改 match
-```
-
-引用一律写 `node ~/.dsh/hooks/guard.mjs`：行首 `~/` 由插件在所有平台展开（含 Windows `cmd`），`wait-flag.mjs` 自己的 flag 参数也展开 `~`。共享配置里不要写死 `C:/Users/...`。
-
 ## 开发
 
 ```sh
@@ -102,4 +208,4 @@ npm test        # node:test 套件（格式、合并、匹配、执行、评估�
 
 ## License
 
-MIT © 2026 jinxzzh。灵感源于 [dsh-hooks-lite](https://github.com/xuedipiaofei/dsh-hooks-lite)（xuedipiaofei），格式与实现均为本项目原创。
+MIT © 2026 jinxzzh

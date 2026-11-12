@@ -1,6 +1,6 @@
 ---
 name: dsh-hook-plus
-description: DSH lifecycle hooks (Qoder-compatible): guard destructive commands, rewrite tool input/output, react to session events, wake the model when long jobs finish. Use when the user mentions hooks, auto-lint, command guardrails, run-completion callbacks, or "notify me when done".
+description: DSH lifecycle hooks: guard destructive commands, rewrite tool input/output, react to session events, wake the model when long jobs finish. Use when the user mentions hooks, auto-lint, command guardrails, run-completion callbacks, or "notify me when done".
 ---
 
 # dsh-hook-plus (progressive reference)
