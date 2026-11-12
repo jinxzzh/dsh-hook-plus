@@ -81,6 +81,18 @@ Reason: no rm
 
 `rewake` 仅明确拒绝才叫醒（`exit 2`、JSON `decision:deny`/`ok:false`）；普通 `exit 1` 和超时只记日志。agent 按会话缓存，首个工具调用即建档，后续 session 事件可用。
 
+## Hook 脚本（可移植安装）
+
+仓库 `hooks/` 下自带开箱脚本（`guard.mjs`、`wait-flag.mjs`），只用可移植路径：
+
+```powershell
+# 一次性安装：拷到你的 DSH home
+Copy-Item <repo>\hooks\* $env:USERPROFILE\.dsh\hooks\
+Copy-Item <repo>\examples\hooks.json $env:USERPROFILE\.dsh\hooks.json  # 再按需改 match
+```
+
+引用一律写 `node ~/.dsh/hooks/guard.mjs`：行首 `~/` 由插件在所有平台展开（含 Windows `cmd`），`wait-flag.mjs` 自己的 flag 参数也展开 `~`。共享配置里不要写死 `C:/Users/...`。
+
 ## 开发
 
 ```sh

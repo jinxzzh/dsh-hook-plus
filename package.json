@@ -22,6 +22,8 @@
   },
   "files": [
     "lib",
+    "hooks",
+    "examples",
     "cordis.patch.yml",
     "market/index.json",
     "skill/SKILL.md",

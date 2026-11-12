@@ -84,6 +84,18 @@ Without any of these they skip-allow loudly; crashes/timeouts report `ok:false` 
 
 `rewake` fires only on explicit deny (`exit 2`, JSON `decision:deny`/`ok:false`); plain `exit 1` and timeouts are logged, never wake. Session identity is cached per tool call, so the first tool call in a session arms later session-event wakes.
 
+## Hook scripts (portable install)
+
+The repo ships ready-made scripts under `hooks/` (`guard.mjs`, `wait-flag.mjs`). They are written against portable paths only:
+
+```powershell
+# one-time setup: copy the scripts into your DSH home
+Copy-Item <repo>\hooks\* $env:USERPROFILE\.dsh\hooks\
+Copy-Item <repo>\examples\hooks.json $env:USERPROFILE\.dsh\hooks.json  # then adapt matchers
+```
+
+Reference them as `node ~/.dsh/hooks/guard.mjs`: the leading `~/` is expanded by the plugin on every platform (including Windows `cmd`), and `wait-flag.mjs` expands `~` in its own flag argument too. Never hard-code `C:/Users/...` in shared configs.
+
 ## Commands
 
 - `/hooks` — list hooks, sources, warnings, recent runs.

@@ -62,5 +62,6 @@ Wake me when a long job finishes (no polling):
 ## Files & commands
 
 Config (low→high precedence): `$DSH_HOME/hooks.json` → inline `config.hooks` → `${cwd}/.dsh/hooks.json` → `${cwd}/.dsh/hooks.local.json`. Later duplicate id wins.
+Ready-made scripts ship in the repo under `hooks/` (`guard.mjs`, `wait-flag.mjs`); install once via `Copy-Item <repo>\hooks\* $env:USERPROFILE\.dsh\hooks\` (or `cp <repo>/hooks/* ~/.dsh/hooks/`), then reference as `node ~/.dsh/hooks/guard.mjs` — the leading `~/` is expanded by the plugin on every platform. Never hard-code `C:/Users/...` in shared configs.
 Commands: `/hooks` (list, warnings, recent runs), `/hooks-reload` (hot reload, no restart). Hook answers are flat JSON: `decision/ok/continue/reason/updatedInput/updatedOutput/additionalContext`.
 Full spec: `D:\daima\dsh-hook-plus\dsh-hook-plus\README.md` (Chinese: `README.zh.md`).
